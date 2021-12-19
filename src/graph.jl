@@ -21,7 +21,9 @@ function get_preconditions(domain, act, vars)
     pos, neg = [], []
     for pre in action.precond.args 
         if pre.name == :not 
-            prop = fill_proposition(pre.args[1], vars; neg=true)
+            vs = []
+            [push!(vs, vardict[arg]) for arg in pre.args[1].args]
+            prop = fill_proposition(pre.args[1], vs)
             push!(neg, prop)
         else 
             vs = []
@@ -43,7 +45,7 @@ function get_effects(domain, act, vars)
         if eff.name == :not 
             vs = []
             [push!(vs, vardict[arg]) for arg in eff.args[1].args]
-            prop = fill_proposition(eff.args[1], vs; neg=true)
+            prop = fill_proposition(eff.args[1], vs)
             push!(neg, prop)
         else 
             vs = []
@@ -56,7 +58,7 @@ function get_effects(domain, act, vars)
 end
 
 
-function fill_proposition(proposition, objs; neg=false)
+function fill_proposition(proposition, objs)
     # if !neg 
     #     prop = Compound(Symbol(proposition.name), objs)
     # else
@@ -101,7 +103,7 @@ function is_mutex_acts(act_pair, μprops)
         for μ in μprops 
             p = μ[1]
             q = μ[2]
-            if p in a.pos_prec && q in b.pos_prec
+            if (p in a.pos_prec && q in b.pos_prec)# && (p in b.pos_prec && q in a.pos_prec)
                 return true
             end
         end
