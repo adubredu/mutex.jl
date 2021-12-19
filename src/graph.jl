@@ -21,7 +21,7 @@ function get_preconditions(domain, act, vars)
     pos, neg = [], []
     for pre in action.precond.args 
         if pre.name == :not 
-            prop = fill_proposition(pre, vars; neg=true)
+            prop = fill_proposition(pre.args[1], vars; neg=true)
             push!(neg, prop)
         else 
             vs = []
@@ -33,6 +33,7 @@ function get_preconditions(domain, act, vars)
     return pos, neg
 end
 
+
 function get_effects(domain, act, vars)
     action = PDDL.get_action(domain, act.name)
     vardict = Dict()
@@ -40,7 +41,7 @@ function get_effects(domain, act, vars)
     pos, neg = [], []
     for eff in action.effect.args 
         if eff.name == :not 
-            prop = fill_proposition(eff, vars; neg=true)
+            prop = fill_proposition(eff.args[1], vars; neg=true)
             push!(neg, prop)
         else 
             vs = []
@@ -54,10 +55,197 @@ end
 
 
 function fill_proposition(proposition, objs; neg=false)
-    if !neg 
-        prop = Compound(Symbol(proposition.name), objs)
-    else
-        prop = Compound(Symbol(proposition.name), [Compound(Symbol(proposition.args[1].name), objs)])
-    end
+    # if !neg 
+    #     prop = Compound(Symbol(proposition.name), objs)
+    # else
+    #     prop = Compound(Symbol(proposition.name), [Compound(Symbol(proposition.args[1].name), objs)])
+    # end
+    if isempty(objs) objs=Term[] end
+    prop = Compound(Symbol(proposition.name), objs)
     return prop
 end
+
+function goal_reached!(domain, problem, graph)
+    goal_set = goalstate(domain, problem).facts
+    index = graph.num_levels - 1
+    props = graph.props[index]
+    μprops = graph.μprops[index]
+    goal_found = false
+    if issubset(goal_set, props)
+        goal_found = true
+        for goal_pair in collect(permutations(goal_set, 2))
+            if goal_pair in μprops
+                goal_found = false
+                break 
+            end
+        end
+    elseif index > 0 && graph.props[index-1] == props 
+        graph.leveled = true
+    end 
+    return goal_found
+end
+
+
+function is_mutex_acts(act_pair, μprops)
+    a = act_pair[1]
+    b = act_pair[2]
+
+    if !isempty(intersect(a.neg_eff, union(b.pos_prec, b.pos_eff))) ||
+       !isempty(intersect(b.neg_eff, union(a.pos_prec, a.pos_eff)))
+        return true
+    end
+
+    if !isempty(μprops)
+        for μ in μprops 
+            p = μ[1]
+            q = μ[2]
+            if p in a.pos_prec && q in b.pos_prec
+                return true
+            end
+        end
+    end
+    return false
+end
+
+
+function is_mutex_props(prop_pair, action_list, μacts)
+    p = prop_pair[1]
+    q = prop_pair[2]
+
+    for a in action_list
+        if p in a.pos_eff && q in a.pos_eff 
+            return false
+        end
+    end
+
+    actions_with_p = Set()
+    for a in action_list 
+        if p in a.pos_eff 
+            push!(actions_with_p, a)
+        end
+    end
+
+    actions_with_q = Set()
+    for a in action_list 
+        if q in a.pos_eff 
+            push!(actions_with_q, a)
+        end
+    end
+
+    μall = true 
+    for p_action in actions_with_p
+        for q_action in actions_with_q 
+            if p_action == q_action return false end 
+            if !([p_action, q_action] in μacts)
+                μall = false
+                break 
+            end
+        end
+        if !μall break end 
+    end
+    return μall 
+end
+
+
+function action_is_applicable(action, props, μprops)
+    println("\n action name: ",action.name, " pre: ", action.pos_prec)
+    println("props: ", props)
+    if issubset(action.pos_prec, props) && isdisjoint(action.neg_prec, props)
+        app = true
+        println("in subset")
+        if !isempty(μprops)
+            for precondition in collect(permutations(action.pos_prec, 2))
+                if precondition in μprops
+                    app = false
+                    break 
+                end
+            end
+        end
+    else
+        app = false
+    end
+    return app 
+end
+
+function expand!(domain, problem, graph)
+    level = graph.num_levels
+
+    #As 
+    action_list = []
+    for action in get_all_actions(domain, problem)
+        if action_is_applicable(action, graph.props[level-1], graph.μprops[level-1])
+            println("is applicable")
+            push!(action_list, action)
+        end
+    end
+    for prop in graph.props[level-1]
+        push!(action_list, NoOp(prop))
+    end
+    graph.acts[level] = action_list
+
+    #Ps 
+    proposition_list = Set()
+    for action in action_list 
+        for eff in action.pos_eff 
+            push!(proposition_list, eff)
+        end
+    end
+    graph.props[level] = collect(proposition_list)
+    proposition_list = collect(proposition_list)
+
+    #μA
+    action_μ_list = []
+    for act_pair in collect(permutations(action_list, 2))
+        if is_mutex_acts(act_pair, graph.μprops[level-1])
+            push!(action_μ_list, act_pair)
+        end
+    end
+    graph.μacts[level] = action_μ_list
+
+    #μP 
+    proposition_μ_list = []
+    for prop_pair in collect(permutations(proposition_list, 2))
+        if is_mutex_props(prop_pair, action_list,action_μ_list)
+            if !(prop_pair in proposition_μ_list)
+                swapped = [prop_pair[2], prop_pair[1]]
+                if !(swapped in proposition_μ_list)
+                    push!(proposition_μ_list, prop_pair)
+                end
+            end
+        end
+    end
+    graph.μprops[level] = proposition_μ_list
+    
+    graph.num_levels = level + 1 
+    if graph.props[level-1] == proposition_list
+        graph.leveled = true
+    end
+
+    return graph 
+end
+
+
+function get_init_propositions(domain, problem)
+    initprops=[]
+    inits = collect(initstate(domain, problem).facts)
+    for init in inits
+        objs = init.args
+        push!(initprops, fill_proposition(init, objs))
+    end
+    return initprops
+
+end
+
+function create_graph(domain, problem; max_levels=10)
+    graph = Graph()
+    graph.num_levels = 1 
+    graph.props[0] = get_init_propositions(domain, problem)
+
+    for _ in 1:max_levels
+        expand!(domain, problem, graph)
+        if goal_reached!(domain, problem, graph) break end 
+    end
+    graph.num_levels -= 1
+    return graph  
+end
+            

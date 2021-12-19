@@ -12,14 +12,16 @@ mutable struct Graph
     end
 end
 
-mutable struct NoOp 
-    state 
-    preconditions 
-    effects
-    is_noOp 
+mutable struct NoOp  
+    name 
+    args
+    pos_prec 
+    neg_prec 
+    pos_eff 
+    neg_eff 
 
-    function NoOp(state)
-        new(state, state, state, true)
+    function NoOp(prop)
+        new("NoOp", [], [prop], [], [prop], [])
     end
 end
 
