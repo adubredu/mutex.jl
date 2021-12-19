@@ -6,7 +6,8 @@ using Combinatorics
 include("types.jl")
 include("graph.jl")
 
-export create_graph,
-       Graph
+export get_all_actions,
+       Graph,
+       Action
 
 end
