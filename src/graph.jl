@@ -41,7 +41,9 @@ function get_effects(domain, act, vars)
     pos, neg = [], []
     for eff in action.effect.args 
         if eff.name == :not 
-            prop = fill_proposition(eff.args[1], vars; neg=true)
+            vs = []
+            [push!(vs, vardict[arg]) for arg in eff.args[1].args]
+            prop = fill_proposition(eff.args[1], vs; neg=true)
             push!(neg, prop)
         else 
             vs = []
@@ -95,7 +97,7 @@ function is_mutex_acts(act_pair, μprops)
         return true
     end
 
-    if !isempty(μprops)
+    if !isempty(μprops) 
         for μ in μprops 
             p = μ[1]
             q = μ[2]
@@ -148,11 +150,11 @@ end
 
 
 function action_is_applicable(action, props, μprops)
-    println("\n action name: ",action.name, " pre: ", action.pos_prec)
-    println("props: ", props)
+    # println("\n action name: ",action.name, " pre: ", action.pos_prec)
+    # println("props: ", props)
     if issubset(action.pos_prec, props) && isdisjoint(action.neg_prec, props)
         app = true
-        println("in subset")
+        # println("in subset")
         if !isempty(μprops)
             for precondition in collect(permutations(action.pos_prec, 2))
                 if precondition in μprops
@@ -169,12 +171,12 @@ end
 
 function expand!(domain, problem, graph)
     level = graph.num_levels
-
+    println("level ",level)
     #As 
     action_list = []
     for action in get_all_actions(domain, problem)
         if action_is_applicable(action, graph.props[level-1], graph.μprops[level-1])
-            println("is applicable")
+            # println("is applicable")
             push!(action_list, action)
         end
     end

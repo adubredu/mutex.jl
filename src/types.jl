@@ -21,7 +21,7 @@ mutable struct NoOp
     neg_eff 
 
     function NoOp(prop)
-        new("NoOp", [], [prop], [], [prop], [])
+        new(:NoOp, [], [prop], [], [prop], [])
     end
 end
 
