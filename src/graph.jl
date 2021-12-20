@@ -14,6 +14,7 @@ function get_all_actions(domain, problem)
     return actions
 end
 
+
 function get_preconditions(domain, act, vars)
     action = PDDL.get_action(domain, act.name)
     vardict = Dict()
@@ -63,6 +64,7 @@ function fill_proposition(proposition, objs)
     prop = Compound(Symbol(proposition.name), objs)
     return prop
 end
+
 
 function goal_reached!(domain, problem, graph)
     goal_set = goalstate(domain, problem).facts
@@ -163,6 +165,7 @@ function action_is_applicable(action, props, μprops)
     return app 
 end
 
+
 function expand!(domain, problem, graph)
     level = graph.num_levels 
     #As 
@@ -229,6 +232,7 @@ function get_init_propositions(domain, problem)
     return initprops
 
 end
+
 
 function create_graph(domain, problem; max_levels=10)
     graph = Graph()

@@ -5,8 +5,7 @@ mutable struct Graph
     props 
     μprops 
     states
-    leveled
-    
+    leveled   
     function Graph() 
         new(0, Dict(0=>[]), Dict(0=>[]),  Dict(0=>[]), Dict(0=>[]), Dict(), false)
     end
@@ -19,7 +18,6 @@ mutable struct NoOp
     neg_prec 
     pos_eff 
     neg_eff 
-
     function NoOp(prop)
         new(:NoOp, [], [prop], [], [prop], [])
     end
@@ -31,8 +29,7 @@ mutable struct Action
     pos_prec 
     neg_prec 
     pos_eff 
-    neg_eff  
-    
+    neg_eff      
     function Action(name)
         new(name, [], [], [], [], [])
     end
