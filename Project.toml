@@ -1,4 +1,4 @@
-name = "plan_graph"
+name = "mutex"
 uuid = "9009efcf-560c-4ab5-8c68-7e0004936d72"
 authors = ["Alphonsus Adu-Bredu"]
 version = "0.1.0"

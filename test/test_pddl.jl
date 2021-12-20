@@ -1,6 +1,6 @@
 using PDDL
 using Revise
-using plan_graph
+using mutex
 
 domain = load_domain("test/pddl/domain.pddl")
 problem = load_problem("test/pddl/problem.pddl")

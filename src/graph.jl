@@ -105,7 +105,7 @@ function is_mutex_acts(act_pair, μprops)
     end
     return false
 end
-
+ 
 
 function is_mutex_props(prop_pair, action_list, μacts)
     p = prop_pair[1]

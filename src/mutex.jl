@@ -1,4 +1,4 @@
-module plan_graph
+module mutex
 
 using PDDL 
 using Combinatorics
