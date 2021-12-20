@@ -27,5 +27,5 @@
 (:action unstack
   :parameters  (?ob ?underob)
   :precondition (and (on ?ob ?underob) (clear ?ob) (arm-empty))
-  :effect (and (holding ?ob) (clear ?underob)
+  :effect (and (holding ?ob) (clear ?underob) (on-table ?underob)
                (not (on ?ob ?underob)) (not (clear ?ob)) (not (arm-empty)))))

@@ -58,12 +58,7 @@ function get_effects(domain, act, vars)
 end
 
 
-function fill_proposition(proposition, objs)
-    # if !neg 
-    #     prop = Compound(Symbol(proposition.name), objs)
-    # else
-    #     prop = Compound(Symbol(proposition.name), [Compound(Symbol(proposition.args[1].name), objs)])
-    # end
+function fill_proposition(proposition, objs) 
     if isempty(objs) objs=Term[] end
     prop = Compound(Symbol(proposition.name), objs)
     return prop
@@ -103,7 +98,7 @@ function is_mutex_acts(act_pair, μprops)
         for μ in μprops 
             p = μ[1]
             q = μ[2]
-            if (p in a.pos_prec && q in b.pos_prec)# && (p in b.pos_prec && q in a.pos_prec)
+            if (p in a.pos_prec && q in b.pos_prec) 
                 return true
             end
         end
@@ -151,12 +146,9 @@ function is_mutex_props(prop_pair, action_list, μacts)
 end
 
 
-function action_is_applicable(action, props, μprops)
-    # println("\n action name: ",action.name, " pre: ", action.pos_prec)
-    # println("props: ", props)
+function action_is_applicable(action, props, μprops) 
     if issubset(action.pos_prec, props) && isdisjoint(action.neg_prec, props)
-        app = true
-        # println("in subset")
+        app = true 
         if !isempty(μprops)
             for precondition in collect(permutations(action.pos_prec, 2))
                 if precondition in μprops
@@ -172,13 +164,11 @@ function action_is_applicable(action, props, μprops)
 end
 
 function expand!(domain, problem, graph)
-    level = graph.num_levels
-    println("level ",level)
+    level = graph.num_levels 
     #As 
     action_list = []
     for action in get_all_actions(domain, problem)
-        if action_is_applicable(action, graph.props[level-1], graph.μprops[level-1])
-            # println("is applicable")
+        if action_is_applicable(action, graph.props[level-1], graph.μprops[level-1]) 
             push!(action_list, action)
         end
     end
@@ -248,6 +238,7 @@ function create_graph(domain, problem; max_levels=10)
     for _ in 1:max_levels
         expand!(domain, problem, graph)
         if goal_reached!(domain, problem, graph) break end 
+        if graph.leveled break end
     end
     graph.num_levels -= 1
     return graph  
