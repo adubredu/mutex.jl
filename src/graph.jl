@@ -233,19 +233,30 @@ function get_init_propositions(domain, problem)
 
 end
 
+function get_goal_propositions(domain, problem)
+    goalprops=[]
+    goals = collect(goalstate(domain, problem).facts)
+    for goal in goals
+        objs = init.args
+        push!(goalprops, fill_proposition(goal, objs))
+    end
+    return initprops
+
+end
+
 
 function create_graph(domain, problem; max_levels=10)
     graph = Graph()
     graph.num_levels = 1 
-    graph.props[0] = get_init_propositions(domain, problem)
+    graph.props[0] =  get_init_propositions(domain, problem)
 
     for _ in 1:max_levels
         expand!(domain, problem, graph)
         if goal_reached!(domain, problem, graph) break end 
         if graph.leveled break end
     end
-    graph.initprops = collect(initstate(domain, problem).facts)
-    graph.goalprops = collect(goalstate(domain, problem).facts)
+    graph.initprops = get_init_propositions(domain, problem)
+    graph.goalprops = get_goal_propositions(domain, problem)
     graph.num_levels -= 1
     return graph  
 end
