@@ -244,6 +244,8 @@ function create_graph(domain, problem; max_levels=10)
         if goal_reached!(domain, problem, graph) break end 
         if graph.leveled break end
     end
+    graph.initprops = collect(initstate(domain, problem).facts)
+    graph.goalprops = collect(goalstate(domain, problem).facts)
     graph.num_levels -= 1
     return graph  
 end

@@ -6,8 +6,11 @@ mutable struct Graph
     μprops 
     states
     leveled   
+    initprops 
+    goalprops
     function Graph() 
-        new(0, Dict(0=>[]), Dict(0=>[]),  Dict(0=>[]), Dict(0=>[]), Dict(), false)
+        new(0, Dict(0=>[]), Dict(0=>[]),  Dict(0=>[]), Dict(0=>[]), 
+            Dict(), false, [], [])
     end
 end
 
