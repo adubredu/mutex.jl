@@ -237,7 +237,7 @@ function get_goal_propositions(domain, problem)
     goalprops=[]
     goals = collect(goalstate(domain, problem).facts)
     for goal in goals
-        objs = init.args
+        objs = goal.args
         push!(goalprops, fill_proposition(goal, objs))
     end
     return goalprops
