@@ -240,7 +240,7 @@ function get_goal_propositions(domain, problem)
         objs = init.args
         push!(goalprops, fill_proposition(goal, objs))
     end
-    return initprops
+    return goalprops
 
 end
 
