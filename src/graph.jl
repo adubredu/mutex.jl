@@ -256,8 +256,7 @@ function create_graph(domain, problem; max_levels=10)
         if graph.leveled break end
     end
     graph.initprops = get_init_propositions(domain, problem)
-    graph.goalprops = get_goal_propositions(domain, problem)
-    graph.num_levels -= 1
+    graph.goalprops = get_goal_propositions(domain, problem) 
     return graph  
 end
             
