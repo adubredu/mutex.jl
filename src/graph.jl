@@ -76,7 +76,7 @@ function goal_reached!(domain, problem, graph)
     if issubset(goal_set, props)
         goal_found = true
         for goal_pair in collect(permutations(goal_set, 2))
-            if goal_pair in μprops
+            if goal_pair in μprops 
                 goal_found = false
                 break 
             end
