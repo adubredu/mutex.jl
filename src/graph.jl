@@ -68,10 +68,11 @@ end
 
 function goal_reached!(domain, problem, graph)
     goal_set = goalstate(domain, problem).facts
+    goal_set = [goal_set...]
     index = graph.num_levels - 1
     props = graph.props[index]
     μprops = graph.μprops[index]
-    goal_found = false
+    goal_found = false 
     if issubset(goal_set, props)
         goal_found = true
         for goal_pair in collect(permutations(goal_set, 2))
